@@ -1,0 +1,21 @@
+name: GPU Compatibility Report
+description: Report whether gpulivre successfully unlocked your specific GPU model.
+title: "[GPU Report] <Seu Modelo de Placa>"
+labels: ["compatibility"]
+body:
+  - type: input
+    id: pci_id
+    attributes:
+      label: PCI ID da GPU
+      description: "Cole a saída do comando lspci -nn | grep -i nvidia"
+      placeholder: "[10de:2584]"
+    validations:
+      required: true
+  - type: textarea
+    id: dmesg_log
+    attributes:
+      label: Logs do dmesg
+      description: "Cole o resultado de sudo dmesg | grep -i gpu_unlock"
+      placeholder: "pci 0000:01:00.0: gpu_unlock: unlocked"
+    validations:
+      required: true

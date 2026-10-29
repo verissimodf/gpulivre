@@ -1,0 +1,23 @@
+name: Validate gpulivre Structure
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Validate Markdown and Script Syntax
+      run: |
+        echo "Validando arquivos do gpulivre..."
+        test -f README.md
+        test -f scripts/install-gpulivre.sh
+        bash -n scripts/install-gpulivre.sh
+        echo "Tudo certo com a estrutura base!"
