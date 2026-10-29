@@ -24,8 +24,8 @@ Ele remove o estrangulamento artificial imposto de fábrica nos *Tensor Cores* (
 Placas baseadas no chip **GA107** (como a RTX 3050 6GB) retornam a assinatura `0xb77000a1` no registrador `PMC_BOOT_0`, correspondendo ao chip ID binário **`0x177`**. O **gpulivre** introduz a macro estrutural `GA107(id) { id, 0x177, &ga10x }` na árvore de receitas do driver de boot, permitindo que o payload execute via SEC2/Falcon no `initramfs` antes que o driver proprietário da NVIDIA seja carregado.
 
 ### Compatibilidade Homologada
-* **RTX 3050 6GB Desktop:** `[10de:2584]` (Chip GA107)
-* **RTX 3050 8GB Desktop:** `[10de:2507]` / `[10de:2582]` (Chips GA106 / GA107)
+- **RTX 3050 6GB Desktop:** `[10de:2584]` (Chip GA107)
+- **RTX 3050 8GB Desktop:** `[10de:2507]` / `[10de:2582]` (Chips GA106 / GA107)
 
 ---
 
