@@ -8,16 +8,19 @@ on:
 
 jobs:
   validate:
-  
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
+    - name: Inspecionar arvore de arquivos
+      run: ls -la && ls -R
+
     - name: Validate Markdown and Script Syntax
       run: |
         echo "Validando arquivos do gpulivre..."
-        test -f README.md
-        test -f scripts/install-gpulivre.sh
+        if [ ! -f "README.md" ]; then echo "Erro: README.md ausente!"; exit 1; fi
+        if [ ! -f "scripts/install-gpulivre.sh" ]; then echo "Erro: install-gpulivre.sh ausente!"; exit 1; fi
+        
         bash -n scripts/install-gpulivre.sh
         echo "Tudo certo com a estrutura base!"
