@@ -33,31 +33,18 @@ Placas baseadas no chip **GA107** (como a RTX 3050 6GB) retornam a assinatura `0
 
 ### 1. Clonar e Instalar Automaticamente
 ```bash
-git clone [https://github.com/verissimodf/gpulivre.git](https://github.com/verissimodf/gpulivre.git)
+git clone https://github.com/verissimodf/gpulivre.git
 cd gpulivre
 sudo bash scripts/install-gpulivre.sh
-cat << 'EOF' > patches/ga107-rtx3050.patch
-diff --git a/kernel/gpu_unlock/recipes.c b/kernel/gpu_unlock/recipes.c
-index 8c0d111..4f98220 100644
---- a/kernel/gpu_unlock/recipes.c
-+++ b/kernel/gpu_unlock/recipes.c
-@@ -383,6 +383,7 @@ static const struct gu_family ga10x = {
-#define GA103(id) { id, 0x173, &ga10x }
-#define GA104(id) { id, 0x174, &ga10x }
-#define GA106(id) { id, 0x176, &ga10x }
-+#define GA107(id) { id, 0x177, &ga10x }
+```
 
-static const struct gu_card cards[] = {
-/* TU102: RTX 2080 Ti, Titan RTX */
-@@ -431,6 +432,7 @@ static const struct gu_card cards[] = {
-GA104(0x24e0),
-
-GA106(0x2501), GA106(0x2503), GA106(0x2504), GA106(0x2505),
-GA106(0x2507), GA106(0x2508), GA106(0x2509), GA106(0x252f),
-
-GA106(0x2507), GA107(0x2584), GA107(0x2582), GA106(0x2508), GA106(0x2509), GA106(0x252f),
-GA106(0x2544),
-};
+> **Sem etapa extra de patch.** O motor de desbloqueio já está embutido neste
+> repositório em `upstream/gpu-unlock/` (subtree de [Zagitta/gpu-unlock](https://github.com/Zagitta/gpu-unlock) v2.0.0)
+> com as receitas **GA107** (`0x2584` RTX 3050 6GB e `0x2582` RTX 3050 8GB)
+> commitadas em `kernel/gpu_unlock/recipes.c`. O payload equivalente, portável
+> para aplicar sobre upstream fresco, está em
+> [`patches/0001-support-ga107.patch`](patches/0001-support-ga107.patch) e é
+> verificado no CI a cada push.
 
 ### 2. Sincronismo de Boot (Docker + NVIDIA)
 Para evitar que o daemon do Docker suba antes da inicialização completa do driver gráfico (nvidia-drm / /dev/nvidia0), o script configura automaticamente a barreira no systemd:
@@ -93,6 +80,24 @@ services:
 
 🤝 Como Contribuir
 Contribuições, relatos de compatibilidade com outros modelos de placas e melhorias nos scripts de automação são extremamente bem-vindos! Abra uma Issue ou envie um Pull Request.
+
+## 📁 Estrutura do Repositório
+
+```
+gpulivre/
+├── scripts/install-gpulivre.sh   # instalador único (deps + build + GRUB + Docker)
+├── docker/docker-compose.yml     # Ollama otimizado (FlashAttention, KV cache)
+├── patches/0001-support-ga107.patch  # delta GA107 portável sobre upstream v2.0.0
+├── upstream/gpu-unlock/          # motor vendido (subtree Zagitta/gpu-unlock v2.0.0)
+│   ├── kernel/gpu_unlock/        # módulo DKMS das receitas (GA106/GA107/GA107 0x2584, 0x2582)
+│   ├── firmware/                 # extratores de firmware NVIDIA (fetch/extract/notice)
+│   ├── debian/                   # empacotamento .deb original
+│   ├── packaging/                # Arch, RPM, Unraid e conf de initramfs (mkinitcpio/dracut)
+│   ├── tests/                    # testes de módulo e empacotamento
+│   ├── licenses/ + docs/         # licenças GPL-2.0/NVIDIA-MIT e doc técnica
+│   └── AGENTS.md                 # diretrizes do upstream
+└── docs/                         # engenharia silício GA107 + visualizações GitHub Pages
+```
 
 ## 🏆 Inspiração, Créditos e Outros Modelos Suportados
 
