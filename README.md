@@ -104,3 +104,8 @@ Enquanto o **gpulivre** foca na democratização da arquitetura de entrada **Amp
 * **Data Center (GA100):** A100.
 
 Se você possui placas superiores à RTX 3060, o repositório original do Zagitta oferece as receitas estruturais (`sec2`/`booter`) para liberar a potência total dessas GPUs.
+
+## 📈 Gráficos Interativos de Performance
+Explore os dados de benchmark e a estrutura do projeto renderizados em tempo real pelo GitHub Pages:
+* 🚀 **[Gráfico de Ganhos de Performance e Latência](https://verissimodf.github.io/gpulivre/docs/visualizations/ai-performance-gains.html)**
+* 🗂️ **[Status de Sincronização do Repositório](https://verissimodf.github.io/gpulivre/docs/visualizations/repo-sync-status.html)**
