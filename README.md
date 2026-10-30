@@ -59,6 +59,41 @@ GA106(0x2507), GA107(0x2584), GA107(0x2582), GA106(0x2508), GA106(0x2509), GA106
 GA106(0x2544),
 };
 
+### 2. Sincronismo de Boot (Docker + NVIDIA)
+Para evitar que o daemon do Docker suba antes da inicialização completa do driver gráfico (nvidia-drm / /dev/nvidia0), o script configura automaticamente a barreira no systemd:
+
+[Unit]
+After=systemd-udev-settle.service
+
+[Service]
+ExecStartPre=/bin/sh -c 'until /usr/bin/nvidia-smi >/dev/null 2>&1; do sleep 1; done'
+
+### 3. Executando o Ollama Otimizado (docker-compose.yml)
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-llm
+    restart: unless-stopped
+    environment:
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KV_CACHE_TYPE=f16
+      - OLLAMA_VULKAN=0
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./volumes/ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+🤝 Como Contribuir
+Contribuições, relatos de compatibilidade com outros modelos de placas e melhorias nos scripts de automação são extremamente bem-vindos! Abra uma Issue ou envie um Pull Request.
+
 ## 🏆 Inspiração, Créditos e Outros Modelos Suportados
 
 O **gpulivre** nasce como uma extensão focada na usabilidade, automação de infraestrutura (Docker/Ollama) e suporte aos chips de entrada (GA107), construída sobre a base brilhante de engenharia reversa do projeto upstream [Zagitta/gpu-unlock](https://github.com/Zagitta/gpu-unlock).
