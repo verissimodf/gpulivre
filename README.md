@@ -58,3 +58,14 @@ GA106(0x2507), GA106(0x2508), GA106(0x2509), GA106(0x252f),
 GA106(0x2507), GA107(0x2584), GA107(0x2582), GA106(0x2508), GA106(0x2509), GA106(0x252f),
 GA106(0x2544),
 };
+
+## 🏆 Inspiração, Créditos e Outros Modelos Suportados
+
+O **gpulivre** nasce como uma extensão focada na usabilidade, automação de infraestrutura (Docker/Ollama) e suporte aos chips de entrada (GA107), construída sobre a base brilhante de engenharia reversa do projeto upstream [Zagitta/gpu-unlock](https://github.com/Zagitta/gpu-unlock).
+
+Enquanto o **gpulivre** foca na democratização da arquitetura de entrada **Ampere GA107/GA106** (RTX 3050, 3060), o método base de interceptação do `initramfs` descoberto pela comunidade também suporta o desbloqueio de Tensor Cores e limitação de vGPU para as seguintes arquiteturas:
+* **Turing (TU102):** RTX 2080 Ti, Titan RTX.
+* **Ampere High-End (GA102/GA104):** RTX 3070, 3080, 3090 e Titan RTX.
+* **Data Center (GA100):** A100.
+
+Se você possui placas superiores à RTX 3060, o repositório original do Zagitta oferece as receitas estruturais (`sec2`/`booter`) para liberar a potência total dessas GPUs.
