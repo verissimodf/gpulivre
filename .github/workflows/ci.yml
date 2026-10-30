@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # historico completo: o CI valida o patch contra o commit pristine do upstream
 
     - name: Inspecionar arvore de arquivos
       run: ls -la && ls -R
@@ -28,7 +30,7 @@ jobs:
     - name: Verificar patch GA107 sobre upstream pristine
       run: |
         git worktree add --detach /tmp/upstream-pristine 1fe5c8c
-        git apply --check --directory=upstream/gpu-unlock patches/0001-support-ga107.patch
+        git -C /tmp/upstream-pristine apply --check "$GITHUB_WORKSPACE/patches/0001-support-ga107.patch"
         echo "Patch GA107 aplicável sobre upstream 1fc6d62 (v2.0.0)! OK"
 
     - name: Confirmar receitas GA107 no motor vendored
@@ -37,4 +39,5 @@ jobs:
         grep -q '#define GA107(id) { id, 0x177, &ga10x }' upstream/gpu-unlock/kernel/gpu_unlock/recipes.c
         grep -q 'GA107(0x2584)' upstream/gpu-unlock/kernel/gpu_unlock/recipes.c
         grep -q 'GA107(0x2582)' upstream/gpu-unlock/kernel/gpu_unlock/recipes.c
-        echo "Receitas GA107 (0x2584/0x2582) presentes no motor vendored! OK"
+        git -C upstream/gpu-unlock apply --reverse --check /dev/stdin < patches/0001-support-ga107.patch \
+          && echo "Motor vendored é exatamente pristine + patch GA107! OK"
