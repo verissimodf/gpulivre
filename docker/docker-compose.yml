@@ -1,18 +1,20 @@
 services:
-ollama:
-image: ollama/ollama:latest
-container_name: ollama-llm
-restart: unless-stopped
-environment:
-- OLLAMA_FLASH_ATTENTION=1
-- OLLAMA_KV_CACHE_TYPE=f16
-- OLLAMA_VULKAN=0
-ports:
-- "11434:11434"
-deploy:
-resources:
-reservations:
-devices:
-- driver: nvidia
-count: all
-capabilities: [gpu]
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-llm
+    restart: unless-stopped
+    environment:
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KV_CACHE_TYPE=f16
+      - OLLAMA_VULKAN=0
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./volumes/ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
