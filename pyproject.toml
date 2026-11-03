@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpulivre"
+version = "0.1.0"
+description = "Gerenciador autônomo de alocação de GPU, monitoramento de VRAM livre, preempção de tarefas e servidor MCP para ecossistemas de agentes de IA."
+authors = [{ name = "Laus & VerissimoDF Team" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0",
+    "mcp>=1.0.0",
+    "typing_extensions>=4.5.0",
+]
+
+[project.optional-dependencies]
+cuda = [
+    "pynvml>=11.5.0",
+    "torch>=2.0.0",
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[project.scripts]
+gpulivre = "gpulivre.cli:main"
+gpulivre-mcp = "gpulivre.mcp.server:main"
