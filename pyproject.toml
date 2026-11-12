@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gpulivre"
-version = "0.1.0"
+version = "0.2.0"
 description = "Gerenciador autônomo de alocação de GPU, monitoramento de VRAM livre, preempção de tarefas e servidor MCP para ecossistemas de agentes de IA."
 authors = [{ name = "Laus & VerissimoDF Team" }]
 license = { text = "MIT" }
