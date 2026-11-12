@@ -151,3 +151,10 @@ python -m gpulivre.mcp.server
 - [Motor de Fallback Híbrido (Colab & Gemini)](docs/FALLBACK_HIBRIDO.md)
 - [Lições Aprendidas e Autocorreção](tasks/lessons.md)
 - [Changelog](CHANGELOG.md)
+
+## 🌿 Branches (Git Flow)
+- `main` = produção (cada commit é uma versão, tagueada `vX.Y.Z`) · `develop` = integração
+- Features: `feature/<nome>` a partir de `develop`, PR para `develop`
+- Releases: `release/X.Y.Z` a partir de `develop`; merge em `main` + tag + volta para `develop`
+- Hotfix: `hotfix/X.Y.Z` a partir de `main`; merge em `main` + tag + `develop`
+- Versionamento SemVer; convenções em `.gitflow`

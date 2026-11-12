@@ -1,0 +1,9 @@
+# .gitflow — Git Flow conventions for this repository
+MAIN_BRANCH=main
+DEVELOP_BRANCH=develop
+TAG_PREFIX=v
+VERSION_FILE=pyproject.toml
+FEATURE_MERGE=pr
+CHANGELOG=true
+GITHUB_RELEASE=true
+PROTECTED_BRANCHES=false
