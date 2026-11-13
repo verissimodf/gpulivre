@@ -16,8 +16,10 @@ para `benchmarks/results/` em JSON e Markdown (diretório ignorado pelo git).
 
 Todos usam o modelo/checkpoint já configurado no ambiente:
 
-- Whisper: `ggml-small.bin` no container `assistente-pessoal-stt`.
-- Stable Diffusion: `sd-turbo.safetensors` no container `assistente-pessoal-studio-sd`.
+- Whisper: `ggml-small.bin` no container `assistente-pessoal-stt` (CUDA).
+- Stable Diffusion: `sd_xl_turbo_1.0_fp16.q8_0.gguf` (SDXL-Turbo) no container
+  `assistente-pessoal-studio-sd`; o `sd-turbo.safetensors` continua no volume
+  como fallback.
 - llama.cpp e Ollama: `qwen2.5:7b` (blob GGUF do volume do Ollama).
 
 ## Uso
@@ -75,11 +77,39 @@ Antes da suíte completa, confirme que o boot é mesmo stock:
 
 ## Observações do ambiente medido
 
-- **Whisper** roda com `--no-gpu` (CPU). O unlock não altera esse número.
-- **Stable Diffusion** usa o backend CPU: o `sd-server` não encontra devices
-  Vulkan/CUDA. Não há SDXL instalado; o checkpoint medido é o `sd-turbo`.
-- **Ollama**: no primeiro boot do container o cold start do backend CUDA pode
-  estourar o watchdog de discovery (30 s). Reinicie o container com o cache
-  quente e confirme `size_vram > 0` em `/api/ps` antes de medir.
+- **Whisper** roda em CUDA (`whisper.cpp` compilado com `GGML_CUDA`; o
+  `--no-gpu` foi removido do entrypoint). Mede ~42,9x tempo real.
+- **Stable Diffusion** usa o backend CUDA do `sd-server`, com SDXL-Turbo em
+  GGUF q8_0. A geração padrão é 1024x1024/4 steps (~6,05 s/imagem, ~9,9/min)
+  com `--vae-tiling` e `--eager-load`. `STUDIO_MAX_VRAM=6` reserva espaço para
+  Ollama e Whisper coexistirem na mesma GPU.
+- **Ollama** usa a imagem `ollama-llm:warmup`, que pré-aquece os backends
+  `cuda_v12`/`cuda_v13` antes do `serve`. O discovery cai para ~1,6 s e o
+  `qwen2.5:7b` sobe 100% GPU; confirme `size_vram > 0` em `/api/ps`.
 - **llama.cpp**: a medição usa CUDA (`-ngl 99`) e o mesmo blob `qwen2.5:7b` do
   Ollama, o que torna os dois números comparáveis.
+
+## Último resultado (unlocked, CUDA nativo)
+
+Medido em 2026-11-13 com a suíte completa:
+
+| Workload | Resultado |
+| :--- | :--- |
+| `micro` | 49,5 TFLOPS BF16 |
+| `whisper` | 14,132 s de áudio em 0,3294 s (42,9x tempo real) |
+| `sd` | SDXL-Turbo 1024 px/4 steps: 6,05 s/imagem (9,92/min) |
+| `ollama` | prefill 2341,9 tok/s, decode 65,5 tok/s (1007 tokens de prompt) |
+
+Comando:
+
+```bash
+# o studio-sd não publica porta no host; exponha temporariamente para o benchmark
+docker run -d --rm --name sd-proxy \
+  --network assistente-pessoal_studio_internal \
+  -p 127.0.0.1:17870:7870 alpine/socat \
+  tcp-listen:7870,fork,reuseaddr tcp:studio-sd:7870
+
+./scripts/benchmark-gpu-unlock.py --only micro,whisper,sd,ollama \
+  --sd-steps 4 --sd-size 1024 --sd-url http://127.0.0.1:17870 \
+  --label unlocked-cuda-all
+```
