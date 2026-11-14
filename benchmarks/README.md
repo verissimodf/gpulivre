@@ -107,13 +107,8 @@ Medido em 2026-11-13 com a suíte completa:
 Comando:
 
 ```bash
-# o studio-sd não publica porta no host; exponha temporariamente para o benchmark
-docker run -d --rm --name sd-proxy \
-  --network assistente-pessoal_studio_internal \
-  -p 127.0.0.1:17870:7870 alpine/socat \
-  tcp-listen:7870,fork,reuseaddr tcp:studio-sd:7870
-
+# o script descobre o IP do studio-sd via `docker inspect`; não é preciso publicar porta
 ./scripts/benchmark-gpu-unlock.py --only micro,whisper,sd,ollama \
-  --sd-steps 4 --sd-size 1024 --sd-url http://127.0.0.1:17870 \
+  --sd-steps 4 --sd-size 1024 \
   --label unlocked-cuda-all
 ```

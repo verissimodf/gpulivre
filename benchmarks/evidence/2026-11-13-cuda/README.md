@@ -131,8 +131,18 @@ python3 -m venv .venv
 
 ## 6. Como reproduzir o benchmark
 
-O `studio-sd` não publica porta no host; para o benchmark é preciso um proxy
-temporário na rede interna:
+O `studio-sd` não publica porta no host, mas a suíte descobre o IP do container via
+`docker inspect` e fala diretamente com ele. Não é preciso proxy:
+
+```bash
+./scripts/benchmark-gpu-unlock.py --only micro,whisper,sd,ollama \
+  --sd-steps 4 --sd-size 1024 --sd-reps 3 \
+  --ollama-model qwen2.5:7b \
+  --label unlocked-cuda-all
+```
+
+Se a descoberta automática não estiver disponível (por exemplo, sem acesso ao
+Docker), publique um proxy temporário e passe `--sd-url`:
 
 ```bash
 docker run -d --rm --name sd-proxy \
@@ -140,13 +150,8 @@ docker run -d --rm --name sd-proxy \
   -p 127.0.0.1:17870:7870 alpine/socat \
   tcp-listen:7870,fork,reuseaddr tcp:studio-sd:7870
 
-./scripts/benchmark-gpu-unlock.py --only micro,whisper,sd,ollama \
-  --sd-steps 4 --sd-size 1024 --sd-reps 3 \
-  --sd-url http://127.0.0.1:17870 \
-  --ollama-model qwen2.5:7b \
-  --label unlocked-cuda-all
-
-docker rm -f sd-proxy
+./scripts/benchmark-gpu-unlock.py --only sd \
+  --sd-url http://127.0.0.1:17870 --sd-steps 4 --sd-size 1024
 ```
 
 Para comparar dois estados (stock × unlocked):
@@ -178,17 +183,10 @@ Sequência usada para confirmar que o unlock e os backends CUDA sobrevivem a um 
 completo. Executar na janela do host:
 
 ```bash
-# 0) proxy temporário para o studio-sd (não publica porta no host)
-cd /opt/laytech-ai/gpulivre
-docker run -d --rm --name sd-proxy \
-  --network assistente-pessoal_studio_internal \
-  -p 127.0.0.1:17870:7870 alpine/socat \
-  tcp-listen:7870,fork,reuseaddr tcp:studio-sd:7870
-
 # 1) antes do reboot: nova rodada com label próprio
+cd /opt/laytech-ai/gpulivre
 ./scripts/benchmark-gpu-unlock.py --only micro,whisper,sd,ollama \
-  --sd-steps 4 --sd-size 1024 --sd-url http://127.0.0.1:17870 \
-  --label pre-reboot
+  --sd-steps 4 --sd-size 1024 --label pre-reboot
 
 # 2) reboot
 sudo reboot
@@ -212,13 +210,11 @@ docker exec ollama-llm ollama ps   # deve mostrar 100% GPU
 # 5) nova rodada e comparação
 cd /opt/laytech-ai/gpulivre
 ./scripts/benchmark-gpu-unlock.py --only micro,whisper,sd,ollama \
-  --sd-steps 4 --sd-size 1024 --sd-url http://127.0.0.1:17870 \
-  --label post-reboot
+  --sd-steps 4 --sd-size 1024 --label post-reboot
 ./scripts/benchmark-gpu-unlock.py --compare \
   benchmarks/results/<pre-reboot>.json benchmarks/results/<post-reboot>.json
 
-# 6) limpeza e desligamento total
-docker rm -f sd-proxy
+# 6) desligamento total
 sudo poweroff
 ```
 
