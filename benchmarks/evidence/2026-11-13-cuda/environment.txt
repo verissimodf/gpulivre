@@ -1,0 +1,65 @@
+GPULivre — evidência de ambiente
+Capturado em: 2026-11-13T21:21:50-03:00
+
+== Host ==
+Linux app 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64 GNU/Linux
+
+== Kernel cmdline ==
+BOOT_IMAGE=/vmlinuz-7.0.0-43-generic root=/dev/mapper/ubuntu--vg-ubuntu--lv ro gpu_unlock.targets=all crashkernel=2G-4G:320M,4G-32G:512M,32G-64G:1024M,64G-128G:2048M,128G-:4096M
+
+== GPU (nvidia-smi) ==
+name, driver_version, memory.total [MiB], memory.used [MiB], utilization.gpu [%], temperature.gpu, power.draw [W], clocks.current.sm [MHz], clocks.max.sm [MHz], power.limit [W]
+NVIDIA GeForce RTX 3060, 595.99.02, 12288 MiB, 9816 MiB, 0 %, 39, 13.58 W, 210 MHz, 2100 MHz, 170.00 W
+
+== Processos na GPU ==
+pid, process_name, used_gpu_memory [MiB]
+780680, whisper-server, 840 MiB
+853139, /opt/sd/sd-server, 4170 MiB
+1316827, /usr/lib/ollama/llama-server, 4662 MiB
+
+== gpu_unlock (journal) ==
+Nov 13 15:48:39 app kernel: pci 0000:01:00.0: gpu_unlock: pass=2/2 attempt=1 target=0x823804 value=0xffffffff before=0x4cb8f after=0xffffffff wpr2=0x2f54000:0x2ffee00 reset_plm=0xffffffff mbox=0x0:0xfffdf000 ret=0
+Nov 13 15:48:39 app kernel: pci 0000:01:00.0: gpu_unlock: stage=host ss0=0x88888888 ss1=0x8 plm_feat=0xffffffff plm_wpr_cfg=0xfffff0ff
+Nov 13 15:48:39 app kernel: pci 0000:01:00.0: gpu_unlock: stage=flr post_wpr2=0x1ffffe00:0x0 ss0=0x88888888 ss1=0x8 plm=0xffffffff cmd=0x3 devsta=0x0 chip=0xb76000a1
+Nov 13 15:48:40 app kernel: pci 0000:01:00.0: gpu_unlock: stage=handoff ret=0 state=4 retained=0 pages=0/20606 cleanup=0
+Nov 13 15:48:40 app kernel: pci 0000:01:00.0: gpu_unlock: unlocked
+
+== Containers ==
+assistente-pessoal | assistente-pessoal:1.12.0 | Up 2 hours (healthy)
+assistente-pessoal-studio-sd | assistente-pessoal-studio-sd:1.12.0-cuda | Up 2 hours (healthy)
+ollama-llm | ollama-llm:warmup | Up 2 hours (healthy)
+assistente-pessoal-stt | assistente-pessoal-stt:whisper-cuda | Up 2 hours
+assistente-pessoal-media-worker | assistente-pessoal-media-worker:1.11.0 | Up 5 hours (healthy)
+assistente-pessoal-wangp-worker | assistente-pessoal-wangp-worker:1.0.0 | Up 5 hours (healthy)
+
+== Ollama ==
+NAME          ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL              
+qwen2.5:7b    845dbda0ea48    4.8 GB    100% GPU     4096       llamacpp    9 minutes from now    
+
+== Imagens ==
+ollama-llm:warmup | 2b0c244ac941 | 9.37GB
+assistente-pessoal-studio-sd:1.12.0-cuda | 1229cbc0e538 | 4.67GB
+assistente-pessoal-stt:whisper-cuda | de4881248009 | 5.44GB
+assistente-pessoal:1.12.0 | aa8f8eeee057 | 2.98GB
+assistente-pessoal-media-worker:1.11.0 | 9f6a05138ad2 | 973MB
+assistente-pessoal-wangp-worker:1.0.0 | 5428f914c4b4 | 14.9GB
+
+== Modelos ==
+-rw-rw-r-- 1 laytech laytech 4.9G Nov  9 12:55 /opt/laytech-ai/models/studio/sd-turbo.safetensors
+-rw-r--r-- 1 root    root    3.9G Nov 13 18:27 /opt/laytech-ai/models/studio/sd_xl_turbo_1.0_fp16.q8_0.gguf
+-rw-rw-r-- 1 laytech laytech 6.5G Nov 13 18:14 /opt/laytech-ai/models/studio/sd_xl_turbo_1.0_fp16.safetensors
+
+== SHA256 do modelo ativo ==
+f3387ead491b0c14c0f17693eb140b924efe1b70bcd4e89195e8be7705728c67  /opt/laytech-ai/models/studio/sd_xl_turbo_1.0_fp16.q8_0.gguf
+
+== stable-diffusion.cpp ==
+stable-diffusion.cpp version unknown, commit fc350be
+
+== whisper.cpp ==
+error: unknown argument: --version
+
+
+== CUDA no container do estúdio ==
+CUDA_VERSION=12.6.3
+	libcudart.so.12 (libc6,x86-64) => /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.12
+	libcudadebugger.so.1 (libc6,x86-64) => /lib/x86_64-linux-gnu/libcudadebugger.so.1

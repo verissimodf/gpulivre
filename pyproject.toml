@@ -29,3 +29,8 @@ test = [
 [project.scripts]
 gpulivre = "gpulivre.cli:main"
 gpulivre-mcp = "gpulivre.mcp.server:main"
+
+# O repositório tem vários diretórios de topo (tests, scripts, docs, upstream).
+# Sem o filtro abaixo o setuptools recusa o install editável por flat-layout ambíguo.
+[tool.setuptools.packages.find]
+include = ["gpulivre*"]

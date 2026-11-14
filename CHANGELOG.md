@@ -2,6 +2,14 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [Não lançado]
+
+### Adicionado
+- **Evidência de benchmark CUDA/SDXL (2026-11-13):** artefatos brutos, ambiente, resultados de `micro`, Whisper, SDXL e Ollama, além das saídas de testes, em [`benchmarks/evidence/2026-11-13-cuda/`](benchmarks/evidence/2026-11-13-cuda/README.md).
+
+### Corrigido
+- Descoberta de pacotes no `pyproject.toml` (`[tool.setuptools.packages.find]`) para permitir `pip install -e ".[test]"` no layout flat do repositório.
+
 ## [0.2.0] - 2026-11-02
 
 ### Adicionado

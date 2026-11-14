@@ -1,0 +1,79 @@
+GPULivre — evidência de testes automatizados
+Capturado em: 2026-11-13T21:22:09-03:00
+Python: Python 3.14.4
+pydantic: 2.14.3
+pytest: 9.2.0
+
+== unittest discover -s tests -v ==
+test_01_monitor_cpu_fallback (test_allocator.TestGPULivre.test_01_monitor_cpu_fallback)
+Verifies that monitor handles environments without hardware GPUs safely. ... ok
+test_02_cleaner_purge (test_allocator.TestGPULivre.test_02_cleaner_purge)
+Verifies cache purge routine produces a valid PurgeReport. ... INFO:gpulivre.cleaner:Purge complete: 244 objects collected, reclaimed 0.00 MB VRAM.
+ok
+test_03_allocator_happy_path (test_allocator.TestGPULivre.test_03_allocator_happy_path)
+Verifies slot allocation when memory is sufficient. ... INFO:gpulivre.allocator:Slot fe4fbb78-df0d-4110-8108-44073b0da618 granted for voice_transcription (1024.0 MB).
+ok
+test_04_allocator_insufficient_memory_rejection (test_allocator.TestGPULivre.test_04_allocator_insufficient_memory_rejection)
+Verifies rejection when requested VRAM exceeds total capacity. ... WARNING:gpulivre.allocator:Insufficient VRAM for 70b_quant: need 5000.0 MB, free 3584.0 MB. Triggering purge.
+ok
+test_05_preemption_of_batch_tasks (test_allocator.TestGPULivre.test_05_preemption_of_batch_tasks)
+Verifies that high-priority interactive tasks (P1 Voice) preempt ... INFO:gpulivre.allocator:Slot 35ad074b-3b29-4dd0-b18e-d7e2a2a595da granted for swarm_simulation_run (800.0 MB).
+WARNING:gpulivre.allocator:Insufficient VRAM for full_duplex_barge_in: need 600.0 MB, free 188.0 MB. Triggering purge.
+WARNING:gpulivre.allocator:Preempted low-priority task swarm_simulation_run (Slot: 35ad074b-3b29-4dd0-b18e-d7e2a2a595da)
+ok
+test_06_release_slot (test_allocator.TestGPULivre.test_06_release_slot)
+Verifies releasing allocated slots. ... INFO:gpulivre.allocator:Slot 77f0a633-e347-4e72-8b2b-736da14fca66 granted for quick_embed (256.0 MB).
+INFO:gpulivre.allocator:Released slot 77f0a633-e347-4e72-8b2b-736da14fca66 (quick_embed).
+ok
+test_07_mcp_dispatcher_tools (test_allocator.TestGPULivre.test_07_mcp_dispatcher_tools)
+Verifies MCP tool dispatching end-to-end. ... INFO:gpulivre.allocator:No physical GPU detected. Granting CPU-fallback virtual slot.
+INFO:gpulivre.cleaner:Purge complete: 1346 objects collected, reclaimed 0.00 MB VRAM.
+ok
+test_01_user_toggle_disabled_bypass_mode (test_hybrid_e2e_validation.TestHybridE2EValidation.test_01_user_toggle_disabled_bypass_mode)
+Validates that when the user disables GPULivre in AssistentePessoal, ... INFO:gpulivre.adapter.voice:[Legacy Mode] GPULivre disabled by user. Running voice task 'tts_synthesis' directly.
+INFO:gpulivre.adapter.swarm:[Legacy Mode] GPULivre disabled by user. Running swarm 'mirofish_consensus' directly.
+ok
+test_02_voice_happy_path_with_toggle_enabled (test_hybrid_e2e_validation.TestHybridE2EValidation.test_02_voice_happy_path_with_toggle_enabled)
+Validates normal voice synthesis when toggle is enabled and VRAM is sufficient. ... INFO:gpulivre.allocator:Slot 57ad09a8-69b1-4a05-937d-68209b58575f granted for tts_piper (600.0 MB).
+INFO:gpulivre.allocator:Released slot 57ad09a8-69b1-4a05-937d-68209b58575f (tts_piper).
+ok
+test_03_concomitant_concurrency_p1_voice_preempts_p3_swarm (test_hybrid_e2e_validation.TestHybridE2EValidation.test_03_concomitant_concurrency_p1_voice_preempts_p3_swarm)
+Validates real-time concurrency: ... INFO:gpulivre.allocator:Slot 5412e011-626a-436b-a599-0400b5931813 granted for mirofish_swarm_sim (1200.0 MB).
+WARNING:gpulivre.allocator:Insufficient VRAM for whisper_vad_barge_in: need 800.0 MB, free 188.0 MB. Triggering purge.
+WARNING:gpulivre.allocator:Preempted low-priority task mirofish_swarm_sim (Slot: 5412e011-626a-436b-a599-0400b5931813)
+INFO:gpulivre.adapter.voice:P1 Voice preempted 1 background task(s) to guarantee zero audio lag.
+INFO:gpulivre.allocator:Released slot cf062435-b0a6-45db-b45b-24d50198368f (whisper_vad_barge_in).
+ok
+test_04_vram_saturation_triggers_hybrid_fallback_to_colab (test_hybrid_e2e_validation.TestHybridE2EValidation.test_04_vram_saturation_triggers_hybrid_fallback_to_colab)
+Validates that when local VRAM is 100% saturated (0 MB effective free), ... WARNING:gpulivre.allocator:Insufficient VRAM for mirofish_monte_carlo: need 2048.0 MB, free 0.0 MB. Triggering purge.
+WARNING:gpulivre.adapter.swarm:Local VRAM insufficient for 'mirofish_monte_carlo' (2048.0 MB). Triggering Hybrid Fallback Engine.
+INFO:gpulivre.fallback:Offloading batch task 'mirofish_monte_carlo' to Google Colab GPU runtime.
+ok
+test_05_vram_saturation_triggers_hybrid_fallback_to_gemini (test_hybrid_e2e_validation.TestHybridE2EValidation.test_05_vram_saturation_triggers_hybrid_fallback_to_gemini)
+Validates that when local VRAM is saturated, LLM inference tasks ... INFO:gpulivre.fallback:Routing task 'market_macro_sentiment' to Gemini Cloud API.
+ok
+test_06_fallback_disabled_by_user_rejects_cleanly (test_hybrid_e2e_validation.TestHybridE2EValidation.test_06_fallback_disabled_by_user_rejects_cleanly)
+Validates that if the user explicitly disables hybrid fallback, ... WARNING:gpulivre.fallback:Hybrid fallback is disabled by user. Task heavy_swarm rejected.
+ok
+test_07_mcp_user_toggle_dispatch (test_hybrid_e2e_validation.TestHybridE2EValidation.test_07_mcp_user_toggle_dispatch)
+Validates MCP tools for getting and setting user toggle preferences. ... INFO:gpulivre.toggle:GPULivre user config updated at /home/laytech/.antigravity/gpulivre_user_config.json
+INFO:gpulivre.toggle:User set gpulivre_enabled = False
+INFO:gpulivre.toggle:GPULivre user config updated at /home/laytech/.antigravity/gpulivre_user_config.json
+INFO:gpulivre.toggle:User set gpulivre_enabled = True
+INFO:gpulivre.toggle:GPULivre user config updated at /home/laytech/.antigravity/gpulivre_user_config.json
+INFO:gpulivre.toggle:User set hybrid_fallback_enabled = True
+INFO:gpulivre.toggle:GPULivre user config updated at /home/laytech/.antigravity/gpulivre_user_config.json
+ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.022s
+
+OK
+
+== pytest tests -q ==
+/tmp/opencode/gpulivre-venv2/lib/python3.14/site-packages/pytest_asyncio/plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..............                                                           [100%]
+14 passed in 0.09s

@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "label": "unlocked",
+    "timestamp": "2026-11-13T20:42:27+00:00",
+    "git_commit": "1942b1c",
+    "kernel": "7.0.0-43-generic",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "memory_total": "12288 MiB",
+      "driver": "595.99.02",
+      "max_sm_clock": "2100 MHz",
+      "power_limit": "170.00 W"
+    },
+    "gpu_unlock": {
+      "active": true,
+      "ss0": "0x88888888",
+      "log_tail": [
+        "Nov 13 15:48:39 app kernel: pci 0000:01:00.0: gpu_unlock: stage=host ss0=0x88888888 ss1=0x8 plm_feat=0xffffffff plm_wpr_cfg=0xfffff0ff",
+        "Nov 13 15:48:39 app kernel: pci 0000:01:00.0: gpu_unlock: stage=flr post_wpr2=0x1ffffe00:0x0 ss0=0x88888888 ss1=0x8 plm=0xffffffff cmd=0x3 devsta=0x0 chip=0xb76000a1",
+        "Nov 13 15:48:40 app kernel: pci 0000:01:00.0: gpu_unlock: stage=handoff ret=0 state=4 retained=0 pages=0/20606 cleanup=0",
+        "Nov 13 15:48:40 app kernel: pci 0000:01:00.0: gpu_unlock: unlocked"
+      ]
+    },
+    "host": "app"
+  },
+  "results": {
+    "micro": {
+      "tflops": 51.0,
+      "n": 8192,
+      "iters": 30,
+      "raw": "gemm n=8192 iters=30 avg=21.54 ms -> 51.0 TFLOPS (BF16 in / FP32 acc)",
+      "status": "ok"
+    },
+    "whisper": {
+      "backend": "http-server",
+      "audio_file": "/opt/laytech-ai/AssistentePessoal/data/voices/49bb6631-0cb2-4be8-af9b-edbde9a0e9c1.mp3",
+      "audio_seconds": 14.132,
+      "elapsed_seconds": 5.5781,
+      "x_realtime": 2.53,
+      "reps": 3,
+      "samples": [
+        5.578,
+        5.552,
+        5.579
+      ],
+      "status": "ok"
+    },
+    "sd": {
+      "backend": "http-server",
+      "model": "sd-turbo",
+      "steps": 2,
+      "size": 256,
+      "seed": 42,
+      "elapsed_seconds": 30.2626,
+      "images_per_minute": 1.98,
+      "reps": 2,
+      "samples": [
+        31.174,
+        29.352
+      ],
+      "status": "ok"
+    },
+    "llamacpp": {
+      "model": "sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730",
+      "model_path": "/opt/laytech-ai/volumes/ollama/models/blobs/sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730",
+      "backend": "docker:ghcr.io/ggml-org/llama.cpp:full-cuda",
+      "prompt_tokens": 512,
+      "gen_tokens": 128,
+      "prefill_tok_s": 2465.71,
+      "decode_tok_s": 69.04,
+      "reps": 3,
+      "status": "ok"
+    },
+    "ollama": {
+      "backend": "http-server",
+      "model": "qwen2.5:7b",
+      "prompt_tokens": 1006,
+      "gen_tokens": 128,
+      "prefill_tok_s": 2360.4733,
+      "decode_tok_s": 66.0358,
+      "reps": 3,
+      "status": "ok"
+    }
+  }
+}
