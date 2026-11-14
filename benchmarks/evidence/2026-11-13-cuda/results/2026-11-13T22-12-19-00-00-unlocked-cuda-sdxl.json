@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "label": "unlocked-cuda-sdxl",
+    "timestamp": "2026-11-13T22:12:19+00:00",
+    "git_commit": "6ab57b6",
+    "kernel": "7.0.0-43-generic",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "memory_total": "12288 MiB",
+      "driver": "595.99.02",
+      "max_sm_clock": "2100 MHz",
+      "power_limit": "170.00 W"
+    },
+    "gpu_unlock": {
+      "active": true,
+      "ss0": "0x88888888",
+      "log_tail": [
+        "Nov 13 15:48:39 app kernel: pci 0000:01:00.0: gpu_unlock: stage=host ss0=0x88888888 ss1=0x8 plm_feat=0xffffffff plm_wpr_cfg=0xfffff0ff",
+        "Nov 13 15:48:39 app kernel: pci 0000:01:00.0: gpu_unlock: stage=flr post_wpr2=0x1ffffe00:0x0 ss0=0x88888888 ss1=0x8 plm=0xffffffff cmd=0x3 devsta=0x0 chip=0xb76000a1",
+        "Nov 13 15:48:40 app kernel: pci 0000:01:00.0: gpu_unlock: stage=handoff ret=0 state=4 retained=0 pages=0/20606 cleanup=0",
+        "Nov 13 15:48:40 app kernel: pci 0000:01:00.0: gpu_unlock: unlocked"
+      ]
+    },
+    "host": "app"
+  },
+  "results": {
+    "sd": {
+      "backend": "http-server",
+      "model": "sd_xl_turbo_1.0_fp16.q8_0",
+      "steps": 4,
+      "size": 1024,
+      "seed": 42,
+      "elapsed_seconds": 6.0688,
+      "images_per_minute": 9.89,
+      "reps": 3,
+      "samples": [
+        6.065,
+        6.069,
+        6.076
+      ],
+      "status": "ok"
+    }
+  }
+}

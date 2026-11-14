@@ -149,6 +149,7 @@ python -m gpulivre.mcp.server
 - [Integração com AssistentePessoal (Voz)](docs/INTEGRACAO_ASSISTENTE_PESSOAL.md)
 - [Integração com Laus (MiroFish Swarm)](docs/INTEGRACAO_LAUS.md)
 - [Motor de Fallback Híbrido (Colab & Gemini)](docs/FALLBACK_HIBRIDO.md)
+- [Evidência de benchmark CUDA/SDXL (2026-11-13)](benchmarks/evidence/2026-11-13-cuda/README.md)
 - [Lições Aprendidas e Autocorreção](tasks/lessons.md)
 - [Changelog](CHANGELOG.md)
 

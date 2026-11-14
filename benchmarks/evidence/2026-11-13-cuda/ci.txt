@@ -1,0 +1,22 @@
+GPULivre — evidência dos checks de CI (execução local)
+Capturado em: 2026-11-13T21:23:11-03:00
+Commit: 9630a55
+
+== bash -n scripts/install-gpulivre.sh ==
+sintaxe OK
+
+== arquivos base ==
+README.md OK
+install-gpulivre.sh OK
+
+== patch GA107 sobre upstream pristine ==
+patch aplicável: OK
+
+== receitas GA107 no motor vendored ==
+macro GA107 OK
+GA107(0x2584) OK
+GA107(0x2582) OK
+vendored = pristine + patch: OK
+
+== limpeza ==
+worktree temporário removido

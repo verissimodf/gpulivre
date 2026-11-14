@@ -4,6 +4,10 @@
 **stock** (sem unlock) e **unlocked** (`gpu_unlock.targets=all`). O resultado vai
 para `benchmarks/results/` em JSON e Markdown (diretório ignorado pelo git).
 
+Os artefatos da captura de 2026-11-13 estão congelados em
+[`benchmarks/evidence/2026-11-13-cuda/`](evidence/2026-11-13-cuda/README.md),
+com ambiente, resultados brutos e testes automatizados.
+
 ## O que mede
 
 | Workload | Carga | Como |
