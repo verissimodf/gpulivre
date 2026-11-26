@@ -50,13 +50,16 @@ gpulivre/
 │   │   ├── monitor.py                 # Telemetria agnóstica (NVML, PyTorch CUDA, MPS, CPU fallback)
 │   │   ├── allocator.py               # Alocador de VRAM com preempção prioritária (P1 > P2 > P3)
 │   │   ├── cleaner.py                 # Expurgo forçado de tensores residuais e coleta de lixo
-│   │   └── hybrid_fallback.py         # Motor de transbordo (Google Colab GPU & Gemini Cloud API)
+│   │   ├── hybrid_fallback.py         # Motor de transbordo (Google Colab GPU & Gemini Cloud API)
+│   │   ├── ceiling.py                 # Tetos de decode, prefill e KV em qualquer backend
+│   │   ├── bench_harness.py           # Benchmark OpenAI-compatible e watchdog de memória
+│   │   └── hill_climber.py            # Otimização intercalada, gates e ledger institucional
 │   ├── adapters/
 │   │   ├── user_toggle.py             # Gerenciador de preferências do usuário e modo bypass
 │   │   ├── voice_adapter.py           # Adaptador P1_CRITICAL para pipeline de voz (AssistentePessoal)
 │   │   └── swarm_adapter.py           # Adaptador P3_BATCH para enxames MiroFish e quant (Laus)
 │   └── mcp/
-│       └── server.py                  # Servidor MCP expondo 7 ferramentas para agentes autônomos
+│       └── server.py                  # Servidor MCP expondo 11 ferramentas para agentes autônomos
 ├── docs/
 │   ├── ARQUITETURA.md                 # Especificação técnica e subsistemas
 │   ├── INTEGRACAO_ASSISTENTE_PESSOAL.md # Manual de integração de voz
@@ -64,7 +67,9 @@ gpulivre/
 │   └── FALLBACK_HIBRIDO.md            # Manual do motor de transbordo para Colab/Gemini
 ├── tests/
 │   ├── test_allocator.py              # Testes unitários do núcleo
-│   └── test_hybrid_e2e_validation.py  # Testes de integração E2E com toggle e concorrência
+│   ├── test_hybrid_e2e_validation.py  # Testes de integração E2E com toggle e concorrência
+│   └── test_hill_climber.py           # Tetos, harness, watchdog, hill-climb e MCP
+├── skills/gpulivre-optimizer/         # Skill nativa de otimização de inferência
 ├── tasks/
 │   └── lessons.md                     # Registro de autocorreção contínua (Padrão Laytech)
 ├── pyproject.toml                     # Metadados de build e dependências
@@ -103,6 +108,12 @@ gpulivre/
 6. **Servidor MCP Nativo (`gpulivre.mcp.server`):**
    - Fornece ferramentas para agentes LLM (Antigravity, Claude Code, Cursor) consultarem a saúde da GPU, reservarem slots, liberarem memória e alternarem preferências em tempo real.
 
+7. **Universal Inference Auto-Tuner:**
+   - Calcula tetos físicos sem assumir GPU, quantização ou engine específicas.
+   - Mede endpoints OpenAI-compatible usando `usage` real, nunca chunks de stream.
+   - Compara `controle → candidato → controle` com medianas e watchdog de VRAM.
+   - Só promove candidatos sem regressão >3% e com needle/full-KV soak aprovados.
+
 ---
 
 ## 🛠️ Ferramentas MCP (`gpulivre-mcp`)
@@ -116,6 +127,50 @@ gpulivre/
 | `gpulivre_list_slots` | Lista todos os slots ativos em execução no momento. |
 | `gpulivre_get_user_config` | Consulta as preferências do usuário no AssistentePessoal. |
 | `gpulivre_set_user_toggle` | Habilita ou desabilita o GPULivre e o Fallback Híbrido em tempo de execução. |
+| `gpulivre_compute_ceiling` | Calcula tetos de decode/prefill e capacidade máxima de KV para o hardware e modelo informados. |
+| `gpulivre_run_interleaved_bench` | Compara controle e candidato em `ctl → cand → ctl`, com pelo menos seis amostras e cap de memória. |
+| `gpulivre_hill_climb` | Executa uma sessão serializada de otimização por prioridade P1/P2/P3 e gates de qualidade. |
+| `gpulivre_get_ledger_history` | Consulta sucessos e falhas anteriores por hardware, modelo, lever e decisão. |
+
+### Primeiro ciclo de hill-climb
+
+O exemplo abaixo usa um servidor local já iniciado em `http://127.0.0.1:8000`. Como o endpoint externo não é reiniciado pelo GPULivre, o candidato altera somente campos documentados de `extra_body`. Os gates são executados pelo harness e a memória é limitada pelo sampler configurado no ambiente Python.
+
+```python
+from gpulivre.mcp.server import dispatch_tool
+
+result = dispatch_tool("gpulivre_hill_climb", {
+    "baseline": {
+        "name": "base",
+        "base_url": "http://127.0.0.1:8000",
+        "model": "meu-modelo",
+        "concurrency": 4,
+        "prefill_lengths": [4096, 32768],
+        "long_context_tokens": 32768,
+        "memory_cap_mb": 14000
+    },
+    "levers": [{
+        "name": "candidate_request_option",
+        "likelihood": 0.5,
+        "config": {
+            "name": "candidate",
+            "base_url": "http://127.0.0.1:8000",
+            "model": "meu-modelo",
+            "concurrency": 4,
+            "prefill_lengths": [4096, 32768],
+            "long_context_tokens": 32768,
+            "memory_cap_mb": 14000,
+            "extra_body": {"cache_prompt": True}
+        }
+    }],
+    "priority": 2,
+    "max_experiments": 1,
+    "hardware": "minha-gpu-ou-memoria-unificada"
+})
+print(result)
+```
+
+`cache_prompt` é apenas um exemplo para servidores que documentam esse campo; remova-o ou substitua-o por uma opção válida na sua engine. Flags de `launch` exigem lifecycle gerenciado e não devem ser enviadas a um endpoint desconhecido. Consulte `skills/gpulivre-optimizer/SKILL.md` antes de otimizar produção.
 
 ---
 
@@ -131,9 +186,9 @@ pip install -e .
 pip install -e ".[cuda]"
 ```
 
-Executando a suíte de testes de validação:
+Executando toda a suíte de testes de validação:
 ```bash
-python -m unittest tests/test_hybrid_e2e_validation.py
+python -m unittest discover tests
 ```
 
 Iniciando o servidor MCP:
@@ -149,6 +204,7 @@ python -m gpulivre.mcp.server
 - [Integração com AssistentePessoal (Voz)](docs/INTEGRACAO_ASSISTENTE_PESSOAL.md)
 - [Integração com Laus (MiroFish Swarm)](docs/INTEGRACAO_LAUS.md)
 - [Motor de Fallback Híbrido (Colab & Gemini)](docs/FALLBACK_HIBRIDO.md)
+- [Skill GPULivre Optimizer](skills/gpulivre-optimizer/SKILL.md)
 - [Lições Aprendidas e Autocorreção](tasks/lessons.md)
 - [Changelog](CHANGELOG.md)
 

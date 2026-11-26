@@ -42,3 +42,14 @@
 - **Ação Corretiva Implementada:** Implementação do `HybridFallbackEngine` (`gpulivre/core/hybrid_fallback.py`), integrando o padrão `colab-drive-modularizer` para desvio automático de simulações pesadas para GPUs gratuitas do Google Colab (Tesla T4/A100) e rotas de inferência para o Google AI Studio (Gemini 2.5 Flash).
 - **Regra Preventiva (Anti-Repetição):** Nunca permitir que um agente autônomo trave por saturação de VRAM local; sempre prover rota de transbordo (offload) assíncrono para instâncias na nuvem.
 - **Evidência de Validação:** `tests/test_hybrid_e2e_validation.py::test_04_vram_saturation_triggers_hybrid_fallback_to_colab` comprovando o redirecionamento automático sob saturação de memória.
+
+---
+
+## 2026-11-26 — Ambiente Python isolado e testes sem efeitos no HOME real
+
+- **Contexto:** A branch `develop` não possui dependências Python instaladas no interpretador do host e os testes MCP persistem toggles em `~/.antigravity`.
+- **Sintoma:** `python` não foi encontrado; `python3` falhou com `ModuleNotFoundError: pydantic`.
+- **Causa raiz:** Dependências declaradas não estavam instaladas no ambiente global e a suíte usa o HOME real por padrão.
+- **Regra para não repetir:** Criar um venv descartável sob `/tmp/opencode`, instalar somente as dependências declaradas e executar testes com `HOME` temporário; não modificar o Python global nem a configuração real do usuário.
+- **Verificação que prova a correção:** Baseline de 14 testes passou no venv com HOME isolado; os testes novos falharam inicialmente por ausência dos módulos, confirmando o gate RED de TDD.
+- **Guarda de recorrência:** Comando canônico da feature usa `/tmp/opencode/gpulivre-universal-inference-tuner-venv/bin/python` e `/tmp/opencode/gpulivre-universal-inference-tuner-home`.

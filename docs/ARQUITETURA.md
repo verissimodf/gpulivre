@@ -39,3 +39,33 @@ O **GPULivre** é arquitetado como uma biblioteca e microsserviço assíncrono e
   - Persistida em `~/.antigravity/gpulivre_user_config.json`.
   - Override via variáveis de ambiente `GPULIVRE_ENABLED` e `GPULIVRE_FALLBACK_ENABLED`.
   - Modo *bypass legado* quando desativado.
+
+---
+
+## 2. Universal Inference Auto-Tuner
+
+### 2.1 `gpulivre.core.ceiling`
+- Consolida identidade do `GPUMonitor` com medições explícitas de bandwidth e FLOPs.
+- Calcula limites de decode, prefill e capacidade de KV para CUDA, ROCm, XPU, MPS e memória unificada.
+- Não deriva especificações físicas do nome comercial da GPU: dados ausentes ficam desconhecidos e geram avisos.
+- Considera contexto, concorrência, quantização e custo/aceitação de speculative decoding.
+
+### 2.2 `gpulivre.core.bench_harness`
+- Cliente stdlib para endpoints OpenAI-compatible, sem acoplamento a llama.cpp, Ollama, vLLM, SGLang ou ExLlama.
+- SSE é usado para TTFT e conteúdo; contagem de tokens vem exclusivamente de `usage` ou de tokenizador real injetado.
+- Mede startup, TTFT, decode c1/cN, cold prefill e needle retrieval.
+- O watchdog inclui memória do processo/driver e aborta a amostra ao ultrapassar o cap. Servidores desconhecidos nunca são encerrados por padrão de processo.
+
+### 2.3 `gpulivre.core.hill_climber`
+- Executa `controle → candidato → controle`, com no mínimo seis amostras agregadas e medianas.
+- Altera um lever por candidato e rejeita regressões superiores a 3%.
+- Exige needle retrieval e full-KV soak antes da promoção para produção.
+- Persiste todas as decisões em `~/.antigravity/gpulivre_ledger.jsonl` e no relatório `gpulivre_PLAN.md`.
+
+### 2.4 Integração MCP
+- `gpulivre_compute_ceiling`: calcula os tetos físicos.
+- `gpulivre_run_interleaved_bench`: executa uma rodada A/B controlada.
+- `gpulivre_hill_climb`: executa uma sessão serializada de candidatos.
+- `gpulivre_get_ledger_history`: recupera tentativas anteriores e evita repetição de falhas.
+
+A metodologia operacional também está disponível em `skills/gpulivre-optimizer/`.

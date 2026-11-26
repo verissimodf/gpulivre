@@ -2,6 +2,15 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [Não lançado]
+
+### Adicionado
+- **Universal Hardware & Inference Auto-Tuner:** cálculo de tetos físicos, harness OpenAI-compatible com watchdog de memória e hill-climb intercalado para CUDA, ROCm, XPU, MPS e memória unificada.
+- **Qualidade e memória institucional:** gates de needle retrieval/full-KV soak, regressão máxima de 3% e histórico append-only em `gpulivre_ledger.jsonl` com relatório `PLAN.md`.
+- **Quatro ferramentas MCP:** `gpulivre_compute_ceiling`, `gpulivre_run_interleaved_bench`, `gpulivre_hill_climb` e `gpulivre_get_ledger_history`.
+- **Skill `gpulivre-optimizer`:** metodologia, tetos, levers e armadilhas adaptados do projeto MIT `inference-optimisation-skill`.
+- **Testes:** cobertura com mocks para tetos, SSE/usage, watchdog, promoção, persistência e dispatcher MCP.
+
 ## [0.2.0] - 2026-11-02
 
 ### Adicionado

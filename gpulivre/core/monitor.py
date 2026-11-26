@@ -21,12 +21,15 @@ class GPUProcessInfo(BaseModel):
 class GPUStatus(BaseModel):
     device_id: int
     name: str
-    backend: str = Field(..., description="cuda | mps | rocm | cpu")
+    backend: str = Field(..., description="cuda | rocm | xpu | mps | cpu")
     total_vram_mb: float
     used_vram_mb: float
     free_vram_mb: float
     utilization_percent: float = 0.0
     temperature_celsius: Optional[float] = None
+    clock_mhz: Optional[float] = None
+    memory_clock_mhz: Optional[float] = None
+    unified_memory: bool = False
     is_available: bool = True
     processes: List[GPUProcessInfo] = Field(default_factory=list)
 
@@ -66,6 +69,14 @@ class GPUMonitor:
                     temp = float(pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU))
                 except Exception:
                     temp = None
+                try:
+                    clock_mhz = float(pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_SM))
+                except Exception:
+                    clock_mhz = None
+                try:
+                    memory_clock_mhz = float(pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_MEM))
+                except Exception:
+                    memory_clock_mhz = None
 
                 # Process list
                 procs = []
@@ -95,13 +106,15 @@ class GPUMonitor:
                     free_vram_mb=free_mb,
                     utilization_percent=float(util_rates.gpu),
                     temperature_celsius=temp,
+                    clock_mhz=clock_mhz,
+                    memory_clock_mhz=memory_clock_mhz,
                     is_available=True,
                     processes=procs,
                 )
             except Exception as e:
                 logger.warning(f"NVML status query failed: {e}. Trying secondary backend.")
 
-        # 2. Try PyTorch CUDA / MPS
+        # 2. Try PyTorch CUDA / ROCm / XPU / MPS
         try:
             import torch
             if torch.cuda.is_available():
@@ -110,15 +123,35 @@ class GPUMonitor:
                 reserved_mb = round(torch.cuda.memory_reserved(self.device_id) / (1024 * 1024), 2)
                 allocated_mb = round(torch.cuda.memory_allocated(self.device_id) / (1024 * 1024), 2)
                 free_mb = max(0.0, total_mb - reserved_mb)
+                is_rocm = bool(getattr(getattr(torch, "version", None), "hip", None))
 
                 return GPUStatus(
                     device_id=self.device_id,
-                    name=props.name,
-                    backend="cuda",
+                    name=str(props.name),
+                    backend="rocm" if is_rocm else "cuda",
                     total_vram_mb=total_mb,
                     used_vram_mb=allocated_mb,
                     free_vram_mb=free_mb,
                     utilization_percent=round((allocated_mb / total_mb) * 100, 1) if total_mb > 0 else 0.0,
+                    is_available=True,
+                )
+            elif hasattr(torch, "xpu") and torch.xpu.is_available():
+                # Intel Arc / integrated GPUs over torch.xpu
+                props = torch.xpu.get_device_properties(self.device_id)
+                total_mb = round(props.total_memory / (1024 * 1024), 2)
+                reserved_mb = round(torch.xpu.memory_reserved(self.device_id) / (1024 * 1024), 2)
+                allocated_mb = round(torch.xpu.memory_allocated(self.device_id) / (1024 * 1024), 2)
+                free_mb = max(0.0, total_mb - reserved_mb)
+
+                return GPUStatus(
+                    device_id=self.device_id,
+                    name=str(props.name),
+                    backend="xpu",
+                    total_vram_mb=total_mb,
+                    used_vram_mb=allocated_mb,
+                    free_vram_mb=free_mb,
+                    utilization_percent=round((allocated_mb / total_mb) * 100, 1) if total_mb > 0 else 0.0,
+                    unified_memory="unified" in str(props.name).lower(),
                     is_available=True,
                 )
             elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
